@@ -6,16 +6,16 @@
   [x]
   (println x "Hello, World!"))
 
-(def *places-url* "http://www.mtcbus.org/Places.asp")
-(def *routes-url* "http://www.mtcbus.org/Routes.asp")
+(def  *places-url* "http://www.mtcbus.org/Places.asp")
+(def  *routes-url* "http://www.mtcbus.org/Routes.asp")
 
 
 (defn fetch-url [url]
   (html/html-resource (java.net.URL. url)))
 
 (defn fetch-set [resource]
-    (set
-        (map
+    (sorted-set
+        (map 
             html/text(
                 html/select (fetch-url resource) [:option]
                 )
@@ -32,6 +32,6 @@
 
 
 (defn -main[]
-    (spit "/tmp/places.txt" (fetch-places) )
-    (spit "/tmp/routes.txt" (fetch-routes) )
-    )
+    (doseq [places (map #(apply str [\" %1 \"] ) (apply eval '(fetch-places) ) )] 
+      (println  places))
+  )
