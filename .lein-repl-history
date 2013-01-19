@@ -1,0 +1,2 @@
+(use 'clj-startup.core)
+(foo "gautam")
