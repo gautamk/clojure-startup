@@ -1,9 +1,37 @@
-(ns clj-startup.core)
+(ns clj-startup.core
+    (:require [net.cgrand.enlive-html :as html]))
 
 (defn foo
   "I don't do a whole lot."
   [x]
   (println x "Hello, World!"))
 
-(defn -main []
-    (foo "gautam"))
+(def *places-url* "http://www.mtcbus.org/Places.asp")
+(def *routes-url* "http://www.mtcbus.org/Routes.asp")
+
+
+(defn fetch-url [url]
+  (html/html-resource (java.net.URL. url)))
+
+(defn fetch-set [resource]
+    (set
+        (map
+            html/text(
+                html/select (fetch-url resource) [:option]
+                )
+            )
+        )
+    )
+
+(defn fetch-places []
+    (fetch-set *places-url*)
+)
+(defn fetch-routes []
+    (fetch-set *routes-url*)
+    )
+
+
+(defn -main[]
+    (spit "/tmp/places.txt" (fetch-places) )
+    (spit "/tmp/routes.txt" (fetch-routes) )
+    )
