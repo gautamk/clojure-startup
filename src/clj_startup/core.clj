@@ -54,8 +54,8 @@
 
 (defn fetch-options-set [resource]
   (map 
-      html/text(
-          html/select (fetch-url resource) [:option])))
+      html/text 
+      (html/select (fetch-url resource) [:option])))
 
 (defn fetch-stages-for [route]
   (map html/text (html/select 
