@@ -3,7 +3,13 @@
 (use 'korma.db)
 (use 'korma.core)
 
+(def  *places-url* "http://www.mtcbus.org/Places.asp")
+(def  *routes-url* "http://www.mtcbus.org/Routes.asp")
+(defn stages-for-routes [route] (str *routes-url* "?cboRouteCode=" route))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;   DB Definition
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defdb mys (mysql 
     {:user "mtc" :password "mtc" :db "mtc" :host "localhost" :port "3306" }))
 
@@ -19,7 +25,9 @@
   (table :route_place_subscription)
   (database mys))
 
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;   DB Query
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn insert-places [places]
     (insert places_table
       (values places)))
@@ -37,10 +45,9 @@
   (doseq [place places]
     (insert-route-place-subscription route place)))
 
-(def  *places-url* "http://www.mtcbus.org/Places.asp")
-(def  *routes-url* "http://www.mtcbus.org/Routes.asp")
-(defn stages-for-routes [route] (str *routes-url* "?cboRouteCode=" route))
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;   DATA Fetch 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn fetch-url [url]
   (html/html-resource (java.net.URL. url)))
@@ -62,6 +69,9 @@
 (defn fetch-routes []
     (fetch-options-set *routes-url*))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;   DB and FETCH INTEGRATION
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn truncate-and-populate-places []
    (exec-raw ["TRUNCATE TABLE places;"] )
   (insert-places
@@ -80,6 +90,9 @@
   (doseq [route (fetch-routes)]
     (insert-places-for-route route (fetch-stages-for (stages-for-routes route)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;   MAIN
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn -main[]
   (truncate-and-populate-places)
   (truncate-and-populate-routes)
